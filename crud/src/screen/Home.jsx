@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Table } from "react-bootstrap";
 import { useAuth } from "../context/AuthContext";
-
 const Home = () => {
   const { user } = useAuth();
 
@@ -28,18 +27,22 @@ const Home = () => {
 
     if (editId) {
       updatedTasks = tasks.map((t) =>
-        t.id === editId ? { ...t, text: task } : t
+        t.id === editId
+          ? { ...t, text: task, updatedAt: new Date().toLocaleString() } // update timestamp
+          : t
       );
       setEditId(null);
-    }
-    else {
+    } else {
+      // new task
       const newTask = {
         id: Date.now(),
         text: task,
         date: new Date().toLocaleDateString(),
+        updatedAt: null,
       };
       updatedTasks = [...tasks, newTask];
     }
+
 
     setTasks(updatedTasks);
     localStorage.setItem(
@@ -64,50 +67,76 @@ const Home = () => {
   };
 
   return (
-    <div>
-      <h1>Welcome, {user ? user.name : "Guest"}!</h1>
+    <div className="containe m-5">
+      <h1 className="text-center mb-4">
+        Welcome, <span className="text-primary">{user ? user.name : "Guest"}</span>!
+      </h1>
 
       {user && (
-        <>
-          <input
-            type="text"
-            value={task}
-            onChange={handleChange}
-            placeholder="Enter task"
-          />
-          <button onClick={handleTask}>
-            {editId ? "Update Task" : "Submit"}
-          </button>
-        </>
+        <div className="card p-3 mb-4 shadow-sm">
+          <div className="d-flex gap-2">
+            <input
+              type="text"
+              value={task}
+              onChange={handleChange}
+              placeholder="Enter task"
+              className="form-control"
+            />
+
+            <button
+              onClick={handleTask}
+              className={`btn ${editId ? "btn-warning" : "btn-success"}`}
+            >
+              {editId ? "Update Task" : "Add Task"}
+            </button>
+          </div>
+        </div>
       )}
 
       {user && tasks.length > 0 && (
-        <Table striped bordered hover>
-          <thead>
-            <tr>
-              <th>No.</th>
-              <th>Task</th>
-              <th>Date</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {tasks.map((t, index) => (
-              <tr key={t.id}>
-                <td>{index + 1}</td>
-                <td>{t.text}</td>
-                <td>{t.date}</td>
-                <td>
-                  <button onClick={() => handleEdit(t)}>Edit</button>{" "}
-                  <button onClick={() => handleDelete(t.id)}>Delete</button>
-                </td>
+        <div className="card shadow-sm">
+          <Table striped bordered hover className="mb-0">
+            <thead className="table-dark">
+              <tr>
+                <th>No.</th>
+                <th>Task</th>
+                <th>Date</th>
+                <th>Updated At</th>
+                <th>Actions</th>
               </tr>
-            ))}
-          </tbody>
-        </Table>
+            </thead>
+
+            <tbody>
+              {tasks.map((t, index) => (
+                <tr key={t.id}>
+                  <td>{index + 1}</td>
+                  <td>{t.text}</td>
+                  <td>{t.date}</td>
+                  <td>{t.updatedAt || "-"}</td>
+
+                  <td>
+                    <button
+                      onClick={() => handleEdit(t)}
+                      className="btn btn-sm btn-primary me-2"
+                    >
+                      Edit
+                    </button>
+                    <button
+                      onClick={() => handleDelete(t.id)}
+                      className="btn btn-sm btn-danger"
+                    >
+                      Delete
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </Table>
+        </div>
       )}
     </div>
   );
+
 };
 
 export default Home;
