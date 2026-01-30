@@ -20,7 +20,10 @@ const Login = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-
+    if (email == "" || password == ""){
+      alert("ALl field are required")
+      return;
+    }
     const users = JSON.parse(localStorage.getItem("formData") || "[]");
     const loggedInUser = users.find(u => u.email === email && u.password === password);
 

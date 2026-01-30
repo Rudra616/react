@@ -15,6 +15,10 @@ const Register = () => {
 
     let users = JSON.parse(localStorage.getItem("formData")) || [];
 
+    if (form.name === "" || form.email === "" || form.password === "") {
+      alert("ALl field are required")
+      return;
+    }
 
     if (users.some(u => u.email === form.email)) {
       alert("Email already registered!");
@@ -25,8 +29,9 @@ const Register = () => {
     localStorage.setItem("formData", JSON.stringify(users));
 
     alert("User registered successfully!");
-    navigate("/login")
     setForm({ name: '', email: '', password: '' });
+    navigate("/login")
+
   };
 
 

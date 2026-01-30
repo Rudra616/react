@@ -65,77 +65,90 @@ const Home = () => {
       JSON.stringify(updatedTasks)
     );
   };
-
   return (
-    <div className="containe m-5">
+    <div className="container mt-5" style={{ maxWidth: "900px" }}>
+
+      {/* Header */}
       <h1 className="text-center mb-4">
-        Welcome, <span className="text-primary">{user ? user.name : "Guest"}</span>!
+        Welcome,{" "}
+        <span className="text-primary fw-bold">
+          {user ? user.name : "Guest"}
+        </span>
+        !
       </h1>
 
+      {/* Task Input */}
       {user && (
-        <div className="card p-3 mb-4 shadow-sm">
-          <div className="d-flex gap-2">
-            <input
-              type="text"
-              value={task}
-              onChange={handleChange}
-              placeholder="Enter task"
-              className="form-control"
-            />
+        <div className="card p-4 mb-4 shadow-sm">
+          <div className="row g-2">
+            <div className="col-md-9">
+              <input
+                type="text"
+                value={task}
+                onChange={handleChange}
+                placeholder="Enter task"
+                className="form-control"
+              />
+            </div>
 
-            <button
-              onClick={handleTask}
-              className={`btn ${editId ? "btn-warning" : "btn-success"}`}
-            >
-              {editId ? "Update Task" : "Add Task"}
-            </button>
+            <div className="col-md-3 d-grid">
+              <button
+                onClick={handleTask}
+                className={`btn ${editId ? "btn-warning" : "btn-success"}`}
+              >
+                {editId ? "Update Task" : "Add Task"}
+              </button>
+            </div>
           </div>
         </div>
       )}
 
+      {/* Task Table */}
       {user && tasks.length > 0 && (
         <div className="card shadow-sm">
-          <Table striped bordered hover className="mb-0">
-            <thead className="table-dark">
-              <tr>
-                <th>No.</th>
-                <th>Task</th>
-                <th>Date</th>
-                <th>Updated At</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-
-            <tbody>
-              {tasks.map((t, index) => (
-                <tr key={t.id}>
-                  <td>{index + 1}</td>
-                  <td>{t.text}</td>
-                  <td>{t.date}</td>
-                  <td>{t.updatedAt || "-"}</td>
-
-                  <td>
-                    <button
-                      onClick={() => handleEdit(t)}
-                      className="btn btn-sm btn-primary me-2"
-                    >
-                      Edit
-                    </button>
-                    <button
-                      onClick={() => handleDelete(t.id)}
-                      className="btn btn-sm btn-danger"
-                    >
-                      Delete
-                    </button>
-                  </td>
+          <div className="table-responsive">
+            <Table striped bordered hover className="mb-0 align-middle">
+              <thead className="table-dark">
+                <tr>
+                  <th>#</th>
+                  <th>Task</th>
+                  <th>Date</th>
+                  <th>Updated</th>
+                  <th className="text-center">Actions</th>
                 </tr>
-              ))}
-            </tbody>
-          </Table>
+              </thead>
+
+              <tbody>
+                {tasks.map((t, index) => (
+                  <tr key={t.id}>
+                    <td>{index + 1}</td>
+                    <td>{t.text}</td>
+                    <td>{t.date}</td>
+                    <td>{t.updatedAt || "-"}</td>
+                    <td className="text-center">
+                      <button
+                        onClick={() => handleEdit(t)}
+                        className="btn btn-sm btn-outline-primary me-2"
+                      >
+                        Edit
+                      </button>
+                      <button
+                        onClick={() => handleDelete(t.id)}
+                        className="btn btn-sm btn-outline-danger"
+                      >
+                        Delete
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </Table>
+          </div>
         </div>
       )}
     </div>
   );
+
 
 };
 
