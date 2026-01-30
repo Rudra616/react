@@ -1,16 +1,78 @@
-# React + Vite
+# React Login, Register & Task Manager App
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+This is a simple React web application that includes **User Registration**, **Login**, and a **Task Manager**.  
+All data is stored in the browser using **LocalStorage**.  
+After login, users can add, edit, and delete tasks.
 
-Currently, two official plugins are available:
+---
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## 🚀 Features
 
-## React Compiler
+- User Registration
+- User Login & Logout
+- Authentication using React Context
+- Tasks stored user-wise using LocalStorage
+- Add, Edit, Delete tasks
+- Responsive UI using Bootstrap
+- Protected task access (only logged-in users can manage tasks)
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+---
 
-## Expanding the ESLint configuration
+## 🧠 Application Flow
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+1. When the project runs, the **Home page** is displayed.
+2. If the user is **not logged in**, they will see:
+   - Register option
+   - Login option
+3. After **Register**, user data is stored in **LocalStorage**.
+4. After **Login**, the user:
+   - Is redirected to the **Home page**
+   - Can **add, edit, and delete tasks**
+5. Tasks are stored **separately for each user** using the user’s email.
+6. On **Logout**, the user session is cleared and the app redirects to **Home**.
+
+---
+
+## 📥 Clone the Repository
+
+Clone the project using the command below:
+
+## git clone https://github.com/Rudra616/react.git
+▶️ Run the Project (CRUD Folder)
+Navigate to the project folder:
+cd react
+Open the CRUD folder (where package.json is available)
+Install dependencies:
+npm install
+Start the development server:
+npm run dev
+Open the link shown in the terminal (example):
+http://localhost:5173
+
+
+## 🗂 Project Structure
+src/
+│
+├── context/
+│   └── AuthContext.js
+│
+├── screen/
+│   ├── Home.jsx
+│   ├── Login.jsx
+│   ├── Register.jsx
+│   └── About.jsx
+│
+├── components/
+│   └── Navbar.jsx
+│
+├── App.jsx
+└── main.jsx
+
+## 🧰 Technologies Used
+React
+React Router DOM
+React Bootstrap
+Context API
+JavaScript
+HTML & CSS
+LocalStorage
