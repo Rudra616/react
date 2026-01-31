@@ -4,7 +4,7 @@ import { useAuth } from "../context/AuthContext";
 import Home from "../screen/Home";
 import About from "../screen/About";
 import Login from "../screen/Login";
-import Register from "../screen/register";
+import Register from "../screen/Register";
 
 const Navbar = () => {
   const { user, logout } = useAuth();
