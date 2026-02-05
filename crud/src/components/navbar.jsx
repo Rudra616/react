@@ -4,7 +4,8 @@ import { useAuth } from "../context/AuthContext";
 import Home from "../screen/Home";
 import About from "../screen/About";
 import Login from "../screen/Login";
-import Register from "../screen/register";
+import Register from "../screen/Register";
+import Dashboard from "../screen/Dashboard";
 
 const Navbar = () => {
   const { user, logout } = useAuth();
@@ -21,7 +22,7 @@ const Navbar = () => {
     <>
       <nav className="navbar navbar-expand-lg navbar-dark bg-dark">
         <div className="container">
-          <Link className="navbar-brand">MyApp</Link>
+          <Link className="navbar-brand"  to="/dasborderd" onClick={() => setIsOpen(false)}>MyApp</Link>
 
           <button
             className="navbar-toggler"
@@ -80,6 +81,8 @@ const Navbar = () => {
         <Route path="/about" element={<About />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/dasborderd" element={<Dashboard />} />
+
       </Routes>
     </>
   );

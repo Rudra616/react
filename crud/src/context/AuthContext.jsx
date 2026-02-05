@@ -1,17 +1,29 @@
 import { createContext, useContext, useState, useEffect } from "react";
+import AES from "crypto-js/aes";
+import Utf8 from "crypto-js/enc-utf8";
 
 const AuthContext = createContext();
+const secretKey = "my_super_secret_key"; // keep this secret
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
 
   useEffect(() => {
-    const storedUser = JSON.parse(localStorage.getItem("loggedInUser"));
-    if (storedUser) setUser(storedUser);
+    const storedUserEncrypted = localStorage.getItem("loggedInUser");
+    if (storedUserEncrypted) {
+      try {
+        const bytes = AES.decrypt(storedUserEncrypted, secretKey);
+        const decryptedUser = JSON.parse(bytes.toString(Utf8));
+        setUser(decryptedUser);
+      } catch (err) {
+        console.error("Failed to decrypt logged in user", err);
+      }
+    }
   }, []);
 
   const login = (userData) => {
-    localStorage.setItem("loggedInUser", JSON.stringify(userData));
+    const encryptedData = AES.encrypt(JSON.stringify(userData), secretKey).toString();
+    localStorage.setItem("loggedInUser", encryptedData);
     setUser(userData);
   };
 
