@@ -2,7 +2,6 @@ import { Link, Routes, Route, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import Home from "../screen/Home";
-import About from "../screen/About";
 import Login from "../screen/Login";
 import Register from "../screen/Register";
 import Dashboard from "../screen/Dashboard";
@@ -20,9 +19,11 @@ const Navbar = () => {
 
   return (
     <>
-      <nav className="navbar navbar-expand-lg navbar-dark bg-dark">
-        <div className="container">
-          <Link className="navbar-brand"  to="/dasborderd" onClick={() => setIsOpen(false)}>MyApp</Link>
+<nav
+  className="navbar navbar-expand-lg navbar-dark shadow-sm"
+  style={{ background: "linear-gradient(90deg,#0d6efd,#6610f2)" }}
+>        <div className="container">
+          <Link className="navbar-brand fw-bold fs-4" to="/dasborderd" onClick={() => setIsOpen(false)}>MyApp</Link>
 
           <button
             className="navbar-toggler"
@@ -40,18 +41,14 @@ const Navbar = () => {
                 </Link>
               </li>
 
-              <li className="nav-item">
-                <Link className="nav-link" to="/about" onClick={() => setIsOpen(false)}>
-                  About
-                </Link>
-              </li>
+
             </ul>
 
             <ul className="navbar-nav ms-auto">
               {user ? (
                 <li className="nav-item">
                   <button
-                    className="btn btn-outline-light mt-2 mt-lg-0"
+                    className="btn btn-light text-primary fw-semibold mt-2 mt-lg-0"
                     onClick={handleLogout}
                   >
                     Logout
@@ -78,7 +75,6 @@ const Navbar = () => {
 
       <Routes>
         <Route path="/" element={<Home />} />
-        <Route path="/about" element={<About />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/dasborderd" element={<Dashboard />} />

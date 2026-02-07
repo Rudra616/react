@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import AES from "crypto-js/aes";
 import Utf8 from "crypto-js/enc-utf8";
+import SHA256 from "crypto-js/sha256";
 import { useAuth } from "./AuthContext";
 
 const TaskContext = createContext();
@@ -12,6 +13,9 @@ export const TaskProvider = ({ children }) => {
   const { user } = useAuth();
   const [tasks, setTasks] = useState([]);
 
+  // Generate a safe storage key
+  const getStorageKey = (email) => `tasks_${SHA256(email).toString()}`;
+
   // 🔓 Load tasks when user changes
   useEffect(() => {
     if (!user) {
@@ -19,7 +23,8 @@ export const TaskProvider = ({ children }) => {
       return;
     }
 
-    const encrypted = localStorage.getItem(`tasks_${user.email}`);
+    const storageKey = getStorageKey(user.email);
+    const encrypted = localStorage.getItem(storageKey);
     if (!encrypted) {
       setTasks([]);
       return;
@@ -35,12 +40,11 @@ export const TaskProvider = ({ children }) => {
 
   // Save tasks
   const saveTasks = (updated) => {
+    if (!user) return;
     setTasks(updated);
-    const encrypted = AES.encrypt(
-      JSON.stringify(updated),
-      secretKey
-    ).toString();
-    localStorage.setItem(`tasks_${user.email}`, encrypted);
+    const encrypted = AES.encrypt(JSON.stringify(updated), secretKey).toString();
+    const storageKey = getStorageKey(user.email);
+    localStorage.setItem(storageKey, encrypted);
   };
 
   return (

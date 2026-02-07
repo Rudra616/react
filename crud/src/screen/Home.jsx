@@ -150,78 +150,58 @@ const Home = () => {
 
   return (
     <div className="container mt-5">
-      <h2 className="text-center mb-4">
-        Welcome, <span className="text-primary">{user?.name || "Guest"}</span>
-      </h2>
+      <div className="card shadow-sm mb-4 border-0">
+        <div className="card-body text-center">
+          <h2 className="mb-0">
+            Welcome, <span className="text-primary">{user?.name || "Guest"}</span>
+          </h2>
+        </div>
+      </div>
+      {user && (
 
- <div className="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+        <div className="card shadow-sm border-0 mb-4">
+<div className="card-body d-flex justify-content-between align-items-center flex-wrap gap-3">
+          {/* LEFT: Add Task */}
+          <Button onClick={handleAddClick}>
+            ➕ Add Task
+          </Button>
 
-  {/* LEFT: Add Task */}
-  <Button onClick={handleAddClick}>
-    ➕ Add Task
-  </Button>
+          {/* CENTER: Status Filter Dropdown */}
+          <div className="d-flex align-items-center gap-2">
+            <span className="text-muted small">Status:</span>
 
-  {user && (
-    <>
-      {/* CENTER: Status Filter */}
-      <ButtonGroup>
-        <Button
-          size="sm"
-          variant={statusFilter === "all" ? "primary" : "outline-primary"}
-          onClick={() => setStatusFilter("all")}
-        >
-          All
-        </Button>
-        <Button
-          size="sm"
-          variant={statusFilter === "upcoming" ? "success" : "outline-success"}
-          onClick={() => setStatusFilter("upcoming")}
-        >
-          Upcoming
-        </Button>
-        <Button
-          size="sm"
-          variant={statusFilter === "reminder" ? "warning" : "outline-warning"}
-          onClick={() => setStatusFilter("reminder")}
-        >
-          Reminder
-        </Button>
-        <Button
-          size="sm"
-          variant={statusFilter === "finished" ? "danger" : "outline-danger"}
-          onClick={() => setStatusFilter("finished")}
-        >
-          Finished
-        </Button>
-      </ButtonGroup>
+            <Form.Select
+              size="sm"
+              value={statusFilter}
+              style={{ width: "140px" }}
+              onChange={(e) => setStatusFilter(e.target.value)}
+            >
+              <option value="all">All</option>
+              <option value="upcoming">Upcoming</option>
+              <option value="reminder">Reminder</option>
+              <option value="finished">Finished</option>
+            </Form.Select>
+          </div>
 
-      {/* RIGHT: Time Format */}
-      <ButtonGroup>
-        <Button
-          size="sm"
-          variant={timeFormat === 12 ? "dark" : "outline-dark"}
-          onClick={() => setTimeFormat(12)}
-        >
-          12h
-        </Button>
-        <Button
-          size="sm"
-          variant={timeFormat === 24 ? "dark" : "outline-dark"}
-          onClick={() => setTimeFormat(24)}
-        >
-          24h
-        </Button>
-      </ButtonGroup>
-    </>
-  )}
+          {/* RIGHT: Time Format Switch */}
+          <Form.Check
+            type="switch"
+            id="time-format-switch"
+            label={timeFormat === 24 ? "24 Hour" : "12 Hour"}
+            checked={timeFormat === 24}
+            onChange={() => setTimeFormat(prev => (prev === 24 ? 12 : 24))}
+          />
 </div>
+        </div>
+
+      )}
 
 
 
-      {tasks.length > 0 && (
+
+      {tasks.length > 0 ? (
         <Table striped bordered hover responsive>
-          <thead className="table-dark">
-            <tr>
+<thead className="table-primary text-center">            <tr>
               <th>#</th>
               <th>Task</th>
               <th>Created (UTC)</th>
@@ -241,26 +221,41 @@ const Home = () => {
                 <td>{formatUTC(t.updatedAt)}</td>
                 <td>{formatUTC(t.reminder)}</td>
                 <td>{formatUTC(t.finish)}</td>
-                <td>{getStatus(t)}</td>
-                <td>
-                  <Button size="sm" variant="outline-primary" className="me-2" onClick={() => handleEdit(t)}>Edit</Button>
-                  <Button size="sm" variant="outline-danger" onClick={() => handleDelete(t.id)}>Delete</Button>
+<td className="text-center">{getStatus(t)}</td>                <td>
+                  <Button size="sm" variant="primary" className="me-2" onClick={() => handleEdit(t)}>Edit</Button>
+                  <Button size="sm" variant="danger" onClick={() => handleDelete(t.id)}>Delete</Button>
                 </td>
               </tr>
             ))}
-            {getFilteredTasks().length === 0 && (
-  <p className="text-center text-muted mt-4">
-    No tasks found for this filter
-  </p>
-)}
-
           </tbody>
         </Table>
+      ) : (
+        <div className="text-center text-muted mt-5">
+          <h5>No tasks yet</h5>
+          <p>
+            {user
+              ? "Click 'Add Task' to create your first task"
+              : "Login to create and manage tasks"}
+          </p>
+        </div>
       )}
-
+      {getFilteredTasks().length === 0 && tasks.length > 0 && (
+        <div
+          className="d-flex flex-column justify-content-center align-items-center text-muted"
+          style={{ minHeight: "200px" }}
+        >
+          <h6 className="mb-1">No tasks found</h6>
+          <small>Try changing the status filter</small>
+        </div>
+      )}
       {/* 🔒 Modal locked */}
-      <Modal show={showModal} backdrop="static" keyboard={false} centered>
-        <Modal.Header closeButton>
+      <Modal
+        show={showModal}
+        onHide={() => setShowModal(false)}
+        backdrop="static"
+        keyboard={false}
+        centered
+      >        <Modal.Header closeButton>
           <Modal.Title>{editId ? "Edit Task" : "Add Task"}</Modal.Title>
         </Modal.Header>
         <Modal.Body>
