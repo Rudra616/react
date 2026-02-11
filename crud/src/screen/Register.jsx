@@ -11,105 +11,146 @@ import loginImage from "../assets/react-login.jpeg";
 const secretKey = "my_super_secret_key";
 
 const Register = () => {
-  const [form, setForm] = useState({ name: "", email: "", password: "" });
+  const [form, setForm] = useState({
+    name: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
+  });
+
   const { login } = useAuth();
   const navigate = useNavigate();
 
-  const isValidPassword = (p) =>
-    /^[A-Z][a-z0-9]{6,32}[@#_]$/.test(p);
-  const isValidUsername = (n) =>
-    /^[A-Za-z0-9]{8,10}$/.test(n);
+  const isValidUsername = (name) =>
+    /^[A-Za-z0-9]{8,10}$/.test(name);
+
+  const isValidPassword = (password) =>
+    /^[A-Z][a-z0-9]{6,32}[@#_]$/.test(password);
 
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    if (!form.name || !form.email || !form.password)
-      return showError("All fields required");
+    const { name, email, password, confirmPassword } = form;
 
-    if (!isValidUsername(form.name))
-      return showWarning("Username must be 8-10 characters");
+    if (!name || !email || !password || !confirmPassword) {
+      return showError("All fields are required");
+    }
 
-    if (!isValidPassword(form.password))
-      return showWarning("Password format invalid");
-
+    if (!isValidUsername(name)) {
+      return showWarning(
+        "Username must be 8–10 characters long and contain only letters and numbers"
+      );
+    }
     let usersEncrypted = JSON.parse(localStorage.getItem("formData") || "[]");
 
     const users = usersEncrypted.map((u) =>
       JSON.parse(AES.decrypt(u, secretKey).toString(Utf8))
     );
 
-    if (users.some((u) => u.email === form.email))
+    if (users.some((u) => u.email === email)) {
       return showError("Email already exists");
+    }
+    if (!isValidPassword(password)) {
+      return showWarning(
+        "Password must start with a capital letter, end with @ # or _, and be 8–34 characters long Ex: Test@123"
+      );
+    }
+
+    if (password !== confirmPassword) {
+      return showError("Password and Confirm Password do not match");
+    }
+
+
 
     const encryptedUser = AES.encrypt(
-      JSON.stringify(form),
+      JSON.stringify({ name, email, password }),
       secretKey
     ).toString();
 
     usersEncrypted.push(encryptedUser);
     localStorage.setItem("formData", JSON.stringify(usersEncrypted));
 
-    login(form);
-    showSuccess("Registration successful");
+    login({ name, email });
+    showSuccess("Registration successful 🎉");
     navigate("/");
   };
 
   return (
-<div className="container-fluid vh-100 d-flex align-items-center justify-content-center bg-light">
-  <div className="card shadow auth-card overflow-hidden">
-    <div className="row g-0">
+    <div className="container-fluid vh-100 d-flex align-items-center justify-content-center bg-light">
+      <div className="card shadow auth-card overflow-hidden">
+        <div className="row g-0">
 
-      {/* FORM LEFT */}
-      <div className="col-md-6 p-5 d-flex flex-column justify-content-center slide-in order-md-1">
-        <h3 className="text-center mb-4">Create Account</h3>
+          {/* FORM */}
+          <div className="col-md-6 p-5 d-flex flex-column justify-content-center slide-in">
+            <h3 className="text-center mb-4">Create Account</h3>
 
-        <Form onSubmit={handleSubmit}>
-          <Form.Control
-            className="mb-3"
-            placeholder="Username"
-            value={form.name}
-            onChange={(e) => setForm({ ...form, name: e.target.value })}
-          />
+            <Form onSubmit={handleSubmit}>
+              <Form.Control
+                className="mb-3"
+                placeholder="Username"
+                value={form.name}
+                onChange={(e) =>
+                  setForm({ ...form, name: e.target.value })
+                }
+              />
 
-          <Form.Control
-            className="mb-3"
-            type="email"
-            placeholder="Email"
-            value={form.email}
-            onChange={(e) => setForm({ ...form, email: e.target.value })}
-          />
+              <Form.Control
+                className="mb-3"
+                type="email"
+                placeholder="Email"
+                value={form.email}
+                onChange={(e) =>
+                  setForm({ ...form, email: e.target.value })
+                }
+              />
 
-          <Form.Control
-            className="mb-3"
-            type="password"
-            placeholder="Password"
-            value={form.password}
-            onChange={(e) => setForm({ ...form, password: e.target.value })}
-          />
+              <Form.Control
+                className="mb-3"
+                type="password"
+                placeholder="Password"
+                value={form.password}
+                onChange={(e) =>
+                  setForm({ ...form, password: e.target.value })
+                }
+              />
 
-          <button className="btn btn-primary w-100 py-2">Register</button>
-        </Form>
+              <Form.Control
+                className="mb-3"
+                type="password"
+                placeholder="Confirm Password"
+                value={form.confirmPassword}
+                onChange={(e) =>
+                  setForm({ ...form, confirmPassword: e.target.value })
+                }
+              />
 
-        <p className="text-center mt-3">
-          Already have an account? <Link className="text-primary" to="/login">Sign in</Link>
-        </p>
-      </div>
+              <button className="btn btn-primary w-100 py-2">
+                Register
+              </button>
+            </Form>
 
-      {/* IMAGE RIGHT */}
-      <div
-        className="col-md-6 auth-image d-none d-md-block order-md-2"
-        style={{ backgroundImage: `url(${loginImage})` }}
-      >
-        <div className="auth-image-text">
-          <h2>Start managing today</h2>
-          <p>Your productivity companion</p>
+            <p className="text-center mt-3">
+              Already have an account?{" "}
+              <Link className="text-primary" to="/login">
+                Sign in
+              </Link>
+            </p>
+          </div>
+
+          {/* IMAGE */}
+          <div
+            className="col-md-6 auth-image d-none d-md-block"
+            style={{ backgroundImage: `url(${loginImage})` }}
+          >
+            <div className="auth-image-text">
+              <h2>Start managing today</h2>
+              <p>Your productivity companion</p>
+            </div>
+          </div>
+
         </div>
       </div>
-
     </div>
-  </div>
-</div>
-
   );
 };
 

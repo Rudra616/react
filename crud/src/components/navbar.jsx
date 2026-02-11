@@ -1,85 +1,110 @@
-import { Link, Routes, Route, useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { Link, Routes, Route, useNavigate, useLocation } from "react-router-dom";
+import { useState, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
+
+import Sidebar from "./Sidebar";
+
 import Home from "../screen/Home";
 import Login from "../screen/Login";
 import Register from "../screen/Register";
 import Dashboard from "../screen/Dashboard";
 
+const NAVBAR_HEIGHT = "60px";
+const MAX_WIDTH = "1200px";
+
 const Navbar = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
-  const [isOpen, setIsOpen] = useState(false);
+  const location = useLocation();
+
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  // ✅ close sidebar on route change
+  useEffect(() => {
+    setSidebarOpen(false);
+  }, [location.pathname]);
 
   const handleLogout = () => {
     logout();
-    setIsOpen(false);
-    navigate("/");
+    setSidebarOpen(false);
+    navigate("/login");
   };
 
   return (
     <>
-<nav
-  className="navbar navbar-expand-lg navbar-dark shadow-sm"
-  style={{ background: "linear-gradient(90deg,#0d6efd,#6610f2)" }}
->        <div className="container">
-          <Link className="navbar-brand fw-bold fs-4" to="/dasborderd" onClick={() => setIsOpen(false)}>MyApp</Link>
+      {/* ========== NAVBAR ========== */}
+      <nav
+        className="navbar navbar-dark fixed-top"
+        style={{
+          height: NAVBAR_HEIGHT,
+          background: "linear-gradient(90deg,#0d6efd,#6610f2)",
+          zIndex: 1200,
+        }}
+      >
+        <div
+          style={{
+            maxWidth: MAX_WIDTH,
+            margin: "0 auto",
+            padding: "0 20px",
+            width: "100%",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+          }}
+        >
+          {/* LEFT */}
+          <div className="d-flex align-items-center gap-3">
+            {user && (
+              <button
+                className="btn btn-outline-light btn-sm"
+                onClick={() => setSidebarOpen(true)}
+              >
+                ☰
+              </button>
+            )}
+            <span className="navbar-brand fw-bold">MyApp</span>
+          </div>
 
-          <button
-            className="navbar-toggler"
-            type="button"
-            onClick={() => setIsOpen(!isOpen)}
-          >
-            <span className="navbar-toggler-icon"></span>
-          </button>
-
-          <div className={`collapse navbar-collapse ${isOpen ? "show" : ""}`}>
-            <ul className="navbar-nav">
-              <li className="nav-item">
-                <Link className="nav-link" to="/" onClick={() => setIsOpen(false)}>
-                  Home
+          {/* RIGHT */}
+          <div>
+            {user ? (
+              <button className="btn btn-light btn-sm" onClick={handleLogout}>
+                Logout
+              </button>
+            ) : (
+              <>
+                <Link className="btn btn-outline-light btn-sm me-2" to="/login">
+                  Login
                 </Link>
-              </li>
-
-
-            </ul>
-
-            <ul className="navbar-nav ms-auto">
-              {user ? (
-                <li className="nav-item">
-                  <button
-                    className="btn btn-light text-primary fw-semibold mt-2 mt-lg-0"
-                    onClick={handleLogout}
-                  >
-                    Logout
-                  </button>
-                </li>
-              ) : (
-                <>
-                  <li className="nav-item">
-                    <Link className="nav-link" to="/login" onClick={() => setIsOpen(false)}>
-                      Login
-                    </Link>
-                  </li>
-                  <li className="nav-item">
-                    <Link className="nav-link" to="/register" onClick={() => setIsOpen(false)}>
-                      Register
-                    </Link>
-                  </li>
-                </>
-              )}
-            </ul>
+                <Link className="btn btn-light btn-sm" to="/register">
+                  Register
+                </Link>
+              </>
+            )}
           </div>
         </div>
       </nav>
 
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
-        <Route path="/dasborderd" element={<Dashboard />} />
+      {/* ========== SIDEBAR ========== */}
+      <Sidebar isOpen={sidebarOpen} close={() => setSidebarOpen(false)} />
 
-      </Routes>
+      {/* ========== PAGE CONTENT ========== */}
+      <div
+        style={{
+          paddingTop: "80px",
+          display: "flex",
+          justifyContent: "center",
+        }}
+      >
+        <div style={{ maxWidth: MAX_WIDTH, width: "100%", padding: "0 20px" }}>
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
+            <Route path="/dashboard" element={<Dashboard />} />
+          </Routes>
+        </div>
+      </div>
     </>
   );
 };

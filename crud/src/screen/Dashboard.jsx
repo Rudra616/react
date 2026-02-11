@@ -2,8 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Card, Row, Col } from "react-bootstrap";
 import { useAuth } from "../context/AuthContext";
 import { useTasks } from "../context/TaskContext";
-import AES from "crypto-js/aes";
-import Utf8 from "crypto-js/enc-utf8";
+
 import { useNavigate } from "react-router-dom";
 
 const secretKey = "my_super_secret_key";
@@ -18,32 +17,24 @@ const Dashboard = () => {
 
   const updateCounts = () => {
     if (!user) return;
-    const encrypted = localStorage.getItem(`tasks_${user.email}`);
-    if (!encrypted) return;
 
-    try {
-      const bytes = AES.decrypt(encrypted, secretKey);
-      const tasks = JSON.parse(bytes.toString(Utf8));
+    let u = 0, r = 0, f = 0;
+    const now = new Date().toISOString();
 
-      let u = 0, r = 0, f = 0;
-      const now = new Date().toISOString();
+    tasks.forEach(t => {
+      if (t.finish <= now) f++;
+      else if (t.reminder <= now) r++;
+      else u++;
+    });
 
-      tasks.forEach(t => {
-        if (t.finish <= now) f++;
-        else if (t.reminder <= now) r++;
-        else u++;
-      });
-
-      setCounts({ upcoming: u, reminder: r, finished: f });
-    } catch { }
+    setCounts({ upcoming: u, reminder: r, finished: f });
   };
 
   // Live update every 15s
-  useEffect(() => {
-    updateCounts();
-    const timer = setInterval(updateCounts, 15000);
-    return () => clearInterval(timer);
-  }, [user]);
+useEffect(() => {
+  updateCounts();
+}, [user, tasks]);
+
 
   // Animate count
   useEffect(() => {
