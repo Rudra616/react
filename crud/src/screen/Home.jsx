@@ -24,13 +24,24 @@ const Home = () => {
   const [timeFormat, setTimeFormat] = useState(24);
   const [, forceTick] = useState(0);
   const [statusFilter, setStatusFilter] = useState("all");
-  const getNowUTC = () => {
-    const now = new Date();
-    now.setSeconds(0, 0); // ⬅️ remove seconds & ms
-    return now.toISOString();
+
+  const TASK_REGEX = /^[a-zA-Z0-9_, ]+$/;
+
+  // ===============================
+  // ✅ UTC HELPERS (FINAL & SAFE)
+  // ===============================
+
+  // UTC ISO → datetime-local value (NO local conversion)
+  const utcToInputUTC = (utc) => (utc ? utc.slice(0, 16) : "");
+
+  // datetime-local → UTC ISO
+  const inputUTCToISO = (value) => {
+    const d = new Date(value + ":00Z");
+    return d.toISOString();
   };
 
-
+  const formatUTCNow = () =>
+    new Date().toISOString().replace("T", " ").slice(0, 19) + " UTC";
 
   // 🔁 Live status update
   useEffect(() => {
@@ -51,50 +62,43 @@ const Home = () => {
     setEditId(null);
     setShowModal(true);
   };
-const formatUTCNow = () => {
-  const now = new Date();
-  return now.toLocaleString("en-US", {
-    timeZone: "UTC",
-    hour: "2-digit",
-    minute: "2-digit",
-    hour12: true,
-    year: "numeric",
-    month: "short",
-    day: "2-digit",
-  }) + " UTC";
-};
 
-  // 💾 Save Task (UTC ONLY)
-const handleSave = () => {
-  if (!task.trim()) return showError("Task is required");
-  if (!reminder || !finish) return showError("Reminder & Finish required");
+  // 💾 Save Task (PURE UTC)
+  const handleSave = () => {
+    if (!task.trim()) return showError("Task is required");
+    if (!TASK_REGEX.test(task))
+      return showError("Invalid task format. Use letters, numbers, _ , only");
+    if (!reminder || !finish)
+      return showError("Reminder & Finish required");
 
-  // Treat input as UTC
-  const rUTCms = Date.parse(reminder + "Z");
-  const fUTCms = Date.parse(finish + "Z");
-  const nowUTCms = Date.now();
+    const rUTC = inputUTCToISO(reminder);
+    const fUTC = inputUTCToISO(finish);
 
-  if (rUTCms < nowUTCms || fUTCms < nowUTCms) {
-    return showError(
-      `Selected time is in the past.\nCurrent UTC time: ${formatUTCNow()}`
-    );
-  }
+    const rUTCms = Date.parse(rUTC);
+    const fUTCms = Date.parse(fUTC);
+    const nowUTCms = Date.now();
+    const nowUTC = new Date().toISOString();
 
-  if (rUTCms >= fUTCms) {
-    return showWarning("Reminder must be before Finish time");
-  }
+    if (rUTCms < nowUTCms || fUTCms < nowUTCms) {
+      return showError(
+        `Selected time is in the past.\nCurrent UTC time: ${formatUTCNow()}`
+      );
+    }
 
-  const rUTC = new Date(rUTCms).toISOString();
-  const fUTC = new Date(fUTCms).toISOString();
-  const nowUTC = new Date().toISOString();
+    if (rUTCms >= fUTCms)
+      return showWarning("Reminder must be before Finish time");
 
-  const updated = editId
-    ? tasks.map(t =>
+    let updatedTasks;
+
+    if (editId) {
+      updatedTasks = tasks.map(t =>
         t.id === editId
           ? { ...t, text: task, reminder: rUTC, finish: fUTC, updatedAt: nowUTC }
           : t
-      )
-    : [
+      );
+      showSuccess("Task updated successfully");
+    } else {
+      updatedTasks = [
         ...tasks,
         {
           id: Date.now(),
@@ -105,13 +109,14 @@ const handleSave = () => {
           finish: fUTC,
         },
       ];
+      showSuccess("Task added successfully");
+    }
 
-  saveTasks(updated);
-  setShowModal(false);
-};
+    saveTasks(updatedTasks);
+    setShowModal(false);
+  };
 
-
-  // ✏️ Edit
+  // ✏️ Edit (UTC SAFE)
   const handleEdit = (t) => {
     if (!user) {
       showInfo("Login required");
@@ -119,16 +124,10 @@ const handleSave = () => {
       return;
     }
 
-const toLocalInput = (utc) => {
-  const d = new Date(utc);
-  d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
-  return d.toISOString().slice(0, 16);
-};
-
     setEditId(t.id);
     setTask(t.text);
-    setReminder(toLocalInput(t.reminder));
-    setFinish(toLocalInput(t.finish));
+    setReminder(utcToInputUTC(t.reminder));
+    setFinish(utcToInputUTC(t.finish));
     setShowModal(true);
   };
 
@@ -151,59 +150,26 @@ const toLocalInput = (utc) => {
     return <Badge bg="success">Upcoming</Badge>;
   };
 
-  // 🕒 UTC formatter (12/24 only affects display)
+  // 🕒 UTC formatter
   const formatUTC = (date) => {
     if (!date) return "-";
     const d = new Date(date);
     return timeFormat === 24
       ? d.toISOString().replace("T", " ").slice(0, 19) + " UTC"
-      : d.toLocaleString("en-US", {
-        timeZone: "UTC",
-        hour12: true,
-      }) + " UTC";
+      : d.toLocaleString("en-US", { timeZone: "UTC", hour12: true }) + " UTC";
   };
 
   // 🔍 Filter
   const getFilteredTasks = () => {
     const now = new Date().toISOString();
-
     if (statusFilter === "upcoming")
       return tasks.filter(t => t.reminder > now && t.finish > now);
-
     if (statusFilter === "reminder")
       return tasks.filter(t => t.reminder <= now && t.finish > now);
-
     if (statusFilter === "finished")
       return tasks.filter(t => t.finish <= now);
-
     return tasks;
   };
-  const getNowLocal = () => {
-    const d = new Date();
-    d.setSeconds(0, 0);
-    return d;
-  };
-
-  const localInputToUTC = (value) => {
-    const d = new Date(value); // local → Date
-    d.setSeconds(0, 0);
-    return d.toISOString();   // store UTC
-  };
-
-  const localToLocalTime = (value) => {
-    const d = new Date(value);
-    d.setSeconds(0, 0);
-    return d.getTime();
-  };
-
-const getNowLocalInput = () => {
-  const d = new Date();
-  d.setSeconds(0, 0);
-  d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
-  return d.toISOString().slice(0, 16);
-};
-  const nowLocalInput = getNowLocalInput();
-
 
   return (
     <div className="container mt-5">
@@ -218,7 +184,7 @@ const getNowLocalInput = () => {
       {user && (
         <div className="card shadow-sm border-0 mb-4">
           <div className="card-body d-flex justify-content-between flex-wrap gap-3">
-            <Button onClick={handleAddClick}>➕ Add Task</Button>
+            <Button onClick={handleAddClick}>Add Task</Button>
 
             <Form.Select
               size="sm"
@@ -276,30 +242,42 @@ const getNowLocalInput = () => {
         </Table>
       )}
 
-      <Modal show={showModal} centered backdrop="static">
-        <Modal.Header closeButton>
+      <Modal
+        show={showModal}
+        centered
+        backdrop="static"
+        onHide={() => setShowModal(false)}
+      >        <Modal.Header closeButton>
           <Modal.Title>{editId ? "Edit Task" : "Add Task"}</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <Form>
-            <Form.Control className="mb-3" value={task} onChange={e => setTask(e.target.value)} />
+            <Form.Group className="mb-3">
+              <Form.Label>Task Name</Form.Label>
+              <Form.Control
+                value={task}
+                onChange={e => TASK_REGEX.test(e.target.value) && setTask(e.target.value)}
+              />
+            </Form.Group>
 
-<Form.Control
-  type="datetime-local"
-  value={reminder}
-  onChange={e => setReminder(e.target.value)}
-/>
+            <Form.Group className="mb-3">
+              <Form.Label>Reminder Date & Time (UTC)</Form.Label>
+              <Form.Control
+                type="datetime-local"
+                value={reminder}
+                onChange={e => setReminder(e.target.value)}
+              />
+            </Form.Group>
 
-
-            <Form.Control
-              type="datetime-local"
-              min={reminder || nowLocalInput}
-              value={finish}
-              onChange={e => setFinish(e.target.value)}
-            />
-
-
-
+            <Form.Group className="mb-3">
+              <Form.Label>Finish Date & Time (UTC)</Form.Label>
+              <Form.Control
+                type="datetime-local"
+                min={reminder}
+                value={finish}
+                onChange={e => setFinish(e.target.value)}
+              />
+            </Form.Group>
           </Form>
         </Modal.Body>
         <Modal.Footer>
