@@ -3,6 +3,7 @@ import { Table, Modal, Button, Form, Badge } from "react-bootstrap";
 import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { useTasks } from "../context/TaskContext";
+import { Dropdown } from "react-bootstrap";
 import {
   showSuccess,
   showError,
@@ -186,18 +187,29 @@ const Home = () => {
           <div className="card-body d-flex justify-content-between flex-wrap gap-3">
             <Button onClick={handleAddClick}>Add Task</Button>
 
-            <Form.Select
-              size="sm"
-              style={{ width: 150 }}
-              value={statusFilter}
-              onChange={e => setStatusFilter(e.target.value)}
-            >
-              <option value="all">All</option>
-              <option value="upcoming">Upcoming</option>
-              <option value="reminder">Reminder</option>
-              <option value="finished">Finished</option>
-            </Form.Select>
+            <Dropdown className="w-100 w-md-auto">
+              <Dropdown.Toggle variant="outline-primary" className="w-100">
+                {statusFilter === "all" && "All"}
+                {statusFilter === "upcoming" && "Upcoming"}
+                {statusFilter === "reminder" && "Reminder"}
+                {statusFilter === "finished" && "Finished"}
+              </Dropdown.Toggle>
 
+              <Dropdown.Menu>
+                <Dropdown.Item onClick={() => setStatusFilter("all")}>
+                  All
+                </Dropdown.Item>
+                <Dropdown.Item onClick={() => setStatusFilter("upcoming")}>
+                  Upcoming
+                </Dropdown.Item>
+                <Dropdown.Item onClick={() => setStatusFilter("reminder")}>
+                  Reminder
+                </Dropdown.Item>
+                <Dropdown.Item onClick={() => setStatusFilter("finished")}>
+                  Finished
+                </Dropdown.Item>
+              </Dropdown.Menu>
+            </Dropdown>
             <Form.Check
               type="switch"
               label={timeFormat === 24 ? "24 Hour" : "12 Hour"}
@@ -207,8 +219,13 @@ const Home = () => {
           </div>
         </div>
       )}
-
-      {tasks.length > 0 && (
+      {getFilteredTasks().length === 0 ? (
+        <div className="text-center py-4">
+          <h6 className="text-muted">
+            No {statusFilter !== "all" ? statusFilter : ""} tasks found
+          </h6>
+        </div>
+      ) : (
         <Table striped bordered hover responsive>
           <thead className="table-primary text-center">
             <tr>
