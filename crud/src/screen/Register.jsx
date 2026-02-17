@@ -25,7 +25,7 @@ const Register = () => {
     /^[A-Za-z0-9]{8,10}$/.test(name);
 
   const isValidPassword = (password) =>
-    /^[A-Z][a-z0-9]{6,32}[@#_]$/.test(password);
+    /^[A-Z][A-Za-z0-9]{6,32}[@#_]$/.test(password);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -52,7 +52,7 @@ const Register = () => {
     }
     if (!isValidPassword(password)) {
       return showWarning(
-        "Password must start with a capital letter, end with @ # or _, and be 8–34 characters long Ex: Test@123"
+      "Password must start with a capital letter, end with @, #, or _, and be 8–34 characters long. Example: Test123@"
       );
     }
 

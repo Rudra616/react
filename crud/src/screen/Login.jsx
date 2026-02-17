@@ -21,9 +21,15 @@ const Login = () => {
 
     const usersEncrypted = JSON.parse(localStorage.getItem("formData") || "[]");
 
-    const users = usersEncrypted.map((u) =>
-      JSON.parse(AES.decrypt(u, secretKey).toString(Utf8))
-    );
+const users = usersEncrypted.map((u) => {
+  try {
+    const bytes = AES.decrypt(u, secretKey);
+    const decrypted = bytes.toString(Utf8);
+    return decrypted ? JSON.parse(decrypted) : null;
+  } catch (error) {
+    return null;
+  }
+}).filter(Boolean);
 
     const user = users.find(
       (u) => u.email === email && u.password === password
